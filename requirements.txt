@@ -1,1 +1,4 @@
 numpy==2.5.3
+pyEDFlib==0.1.42
+pandas
+
