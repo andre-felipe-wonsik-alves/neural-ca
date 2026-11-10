@@ -24,6 +24,9 @@ freeze:
 	@$(PIP) freeze > requirements.txt
 
 run: install
+	@echo
 	@echo "Packages verified!"
 	@echo "Executing..."
-	@$(PYTHON) main.py
+	@echo "____________________________"
+	@echo
+	@$(PYTHON) ./src/main.py

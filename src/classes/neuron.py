@@ -22,13 +22,21 @@ class Neuron:
             }
             self.potential = state_map[initial_state]
         else:
-            self.potential = initial_state
+            self.potential = int(initial_state)
         self.is_inhibitory = is_inhibitory
-        self.neighbors = []
+        self.neighbors: list["Neuron"] = []
 
     @property
     def state(self) -> NeuronState:
         return NeuronState.from_potential(self.potential)
+
+    @property
+    def is_firing(self) -> bool:
+        return 1 <= self.potential <= 4
+
+    @property
+    def is_hyperpolarized(self) -> bool:
+        return self.potential == 5
 
     def update_state(
         self,
@@ -36,23 +44,24 @@ class Neuron:
         close_inhibitories: int,
         close_hyperpolarizators: int,
         rest_threshold: int = 8,
-        relative_threshold: int = 12,
+        relative_threshold: int = 10,
         alpha: float = 0.1,
+        spontaneous: bool = False,
     ):
         stimulus = (
             close_excitatories - close_inhibitories - (alpha * close_hyperpolarizators)
         )
 
-        current_state = self.state
+        current_potential = self.potential
 
-        if current_state == NeuronState.RESTING:
-            if stimulus >= rest_threshold:
+        if current_potential == self.REST_POTENTIAL:
+            if stimulus >= rest_threshold or spontaneous:
                 self.potential = self.FIRING_START
 
-        elif current_state in (NeuronState.FIRING, NeuronState.HYPERPOLARIZATION):
+        elif 1 <= current_potential <= 5:  # FIRING (1..4) or HYPERPOLARIZATION (5)
             self.potential += 1
 
-        elif current_state == NeuronState.REFRACTORY:
+        elif 6 <= current_potential <= self.MAX_POTENTIAL:  # REFRACTORY (6..10)
             if stimulus >= relative_threshold:
                 self.potential = self.FIRING_START
             else:
